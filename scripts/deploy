@@ -1,0 +1,36 @@
+#!/bin/bash
+
+set -e
+cd `dirname $0`
+cd .. # to get out of `scripts` directory
+
+SSH_HOST=root@herald.randomshit.world
+
+ssh "$SSH_HOST" "systemctl stop negotiator" || true
+rsync -v -a --delete-after --delete-excluded --exclude='node_modules' --exclude='.git' --exclude='dist' --exclude='.next' --exclude='node_modules' --exclude='*.env' --exclude=".turbo" ./ "$SSH_HOST":negotiator/
+scp ./prod.env "$SSH_HOST":negotiator/.env
+
+ssh "$SSH_HOST" 'bash -c "cat > /etc/systemd/system/negotiator.service << \"EOL\"
+[Unit]
+Description=negotiator
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/root/negotiator
+ExecStart=npx codapt start
+ExecStop=/usr/bin/docker stop negotiator
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+EOL
+
+systemctl daemon-reload
+systemctl enable negotiator
+systemctl start negotiator
+"'
+
+echo 'TEMP: tailing negotiator logs'
+ssh "$SSH_HOST" "docker logs -n 300 -f negotiator"

@@ -1,0 +1,5 @@
+Whenever we're calling an LLM use the model `anthropic("claude-3-7-sonnet-latest)` from `@ai-sdk/anthropic`.
+
+For every front end change, make sure you also evaluate the page with aesthetics in mind. The design should be moder, sleek and very user friendly.
+
+When adding new elements to the page, try to use as few text as possible. If it's possible, hide the text behind an icon and only show the text when hovering over the icon.

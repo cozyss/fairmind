@@ -1,0 +1,48 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://postgres:postgres@localhost/app"
+}
+
+model User {
+  id                Int       @id @default(autoincrement())
+  email             String    @unique
+  username          String    @unique
+  hashedPassword    String
+  isVerified        Boolean   @default(false)
+  tier              String    @default("free") // Values: "free", "waitlist", "paid"
+  verificationCode  String?
+  verificationExpires DateTime?
+  lastLoginAt       DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  projects          Project[]
+}
+
+model Project {
+  id                  Int      @id @default(autoincrement())
+  name                String
+  partyAName          String?
+  partyBName          String?
+  partyA              String   @db.VarChar(5000)
+  partyB              String   @db.VarChar(5000)
+  partyAScore         Int?
+  partyBScore         Int?
+  partyAScoreReasoning String?  @db.VarChar(5000)
+  partyBScoreReasoning String?  @db.VarChar(5000)
+  options             String[] @default([])
+  objectiveCriteria   Json?    // Stored criteria data
+  objectiveCriteriaSearchQuery String? @db.VarChar(5000)
+  objectiveCriteriaCitations   String[] @default([])
+  objectiveCriteriaRawContent  String? @db.VarChar(10000)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  userId              Int
+  user                User     @relation(fields: [userId], references: [id])
+}
